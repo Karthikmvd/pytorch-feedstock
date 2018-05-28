@@ -1,0 +1,24 @@
+# This file was generated automatically from conda-smithy. To update this configuration,
+# update the conda-forge.yml and/or the recipe/meta.yaml.
+
+language: generic
+
+os: linux-ppc64le
+
+env:
+  matrix:
+    
+    - CONDA_PY=27
+    - CONDA_PY=35
+    - CONDA_PY=36
+
+
+install:
+    # Install Miniconda.
+    - |
+      echo deb http://ftp.unicamp.br/pub/ppc64el/ubuntu/14_04/docker-17.06.0-ce-ppc64el/ trusty main > /etc/apt/sources.list.d/trusty-docker.list
+      sudo apt-get update
+      sudo apt-get install -y docker-ce
+      sudo apt-get -y install wget git
+script:
+  - travis_wait 30 ./ci_support/run_docker_build.sh pytorch-0.3.1-py${CONDA_PY}
