@@ -1,0 +1,73 @@
+{% set version = "0.4.0" %}
+{% set commit = "200fb22b22c5f1c5345d99743ef43764b9a8323c"%}
+
+package:
+  name: pytorch
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/pytorch/pytorch.git
+  git_tag: {{ commit }}
+  patches:
+    - 0001-force-system-nccl.patch
+    # When run on a system without a GPU, PyTorch does not require the CUDA
+    # libraries. Therefore symbols should not be resolved at load time rather
+    # resolution should be defered until the function is called (lazy binding).
+    - lazy_bind_C_extension.patch
+    # https://github.com/pytorch/pytorch/issues/4499
+    - define_speed_unknown.patch
+
+build:
+  number: 0
+  detect_binary_files_with_prefix: False
+
+requirements:
+  build:
+    - {{ compiler('c') }}  # [not ppc64le]
+    - {{ compiler('cxx') }}  # [not ppc64le]
+    - cmake
+  host:
+    # GPU requirements
+    - cudatoolkit {{ cudatoolkit }}*  # [not ppc64le]
+    - cudnn {{ cudnn }}*  # [not ppc64le]
+    - nccl
+    # other requirements
+    - python
+    - numpy
+    - setuptools
+    - pyyaml
+    - cffi
+    - mkl-devel {{ mkl }} # [not ppc64le]
+    - typing
+    - ninja
+    - magma  # [not ppc64le]
+
+  run:
+    # GPU requirements
+    - cudatoolkit {{ cudatoolkit }}*  # [not ppc64le]
+    - cudnn {{ cudnn }}*  # [not ppc64le]
+    - nccl
+    # other requirements
+    - python
+    - {{ pin_compatible('numpy') }}
+    - cffi
+    - ninja
+
+test:
+  requires:
+    - {{ compiler('c') }}  # [not ppc64le]
+    - {{ compiler('cxx') }}  # [not ppc64le]
+    - setuptools
+  imports:
+    - torch
+  source_files:
+    - test
+  commands:
+    - python ./test/run_test.py || true
+
+about:
+  home: http://pytorch.org/
+  license: BSD 3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: PyTorch is an optimized tensor library for deep learning using GPUs and CPUs.
