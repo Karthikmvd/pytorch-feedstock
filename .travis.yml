@@ -21,4 +21,4 @@ install:
       sudo apt-get install -y docker-ce
       sudo apt-get -y install wget git
 script:
-  - travis_wait 30 ./ci_support/run_docker_build.sh pytorch-0.3.1-py${CONDA_PY}
+  - ./ci_support/run_docker_build.sh pytorch-0.4.0-py${CONDA_PY}
